@@ -662,11 +662,64 @@ def render_plots(
 # ============================== CLI ==============================
 
 
+def classify_input(p: Path) -> str:
+    """Return 'repo' if directory, 'wandb' if .csv file, else raise."""
+    if p.suffix.lower() != ".csv":
+        return "repo"
+    else:
+        return "wandb"
+    raise ValueError(
+        f"Cannot classify '{p}'. Provide a folder (repo) or a .csv file (wandb)."
+    )
+
+
+def choose_config_name(b_kind: str, p_kind: str) -> str:
+    mapping = {
+        ("repo", "repo"): "configs_repo_repo.yaml",
+        ("repo", "wandb"): "configs_repo_wandb.yaml",
+        ("wandb", "repo"): "configs_wandb_repo.yaml",
+        ("wandb", "wandb"): "configs_wandb_wandb.yaml",
+    }
+    return mapping[(b_kind, p_kind)]
+
+
+def resolve_config_path(
+    config_override: Optional[Path], config_name: str, configs_dir: Optional[Path]
+) -> Path:
+    if config_override:
+        return config_override
+    if configs_dir:
+        return configs_dir / config_name
+    return Path(config_name)
+
+
 def main():
     ap = argparse.ArgumentParser(
         description="Compare benchmark runs using ordered-transform YAML."
     )
-    ap.add_argument("--config", required=True, type=Path, help="Path to YAML config.")
+    ap.add_argument(
+        "--baseline",
+        required=True,
+        type=Path,
+        help="Baseline selection: a folder (repo) or a .csv file (wandb).",
+    )
+    ap.add_argument(
+        "--proposed",
+        required=True,
+        type=Path,
+        help="Proposed selection: a folder (repo) or a .csv file (wandb).",
+    )
+    ap.add_argument(
+        "--config",
+        type=Path,
+        help="Optional explicit config YAML path. Overrides automatic selection.",
+    )
+    ap.add_argument(
+        "--configs-dir",
+        type=Path,
+        default=Path("configs"),
+        help="Directory containing the 4 template configs.",
+    )
     ap.add_argument(
         "--mode", choices=["table", "plot"], help="Override output.mode from YAML."
     )
@@ -675,8 +728,16 @@ def main():
     )
     args = ap.parse_args()
 
+    b_kind = classify_input(args.baseline)
+    p_kind = classify_input(args.proposed)
+    config_name = choose_config_name(b_kind, p_kind)
+    cfg_path = resolve_config_path(args.config, config_name, args.configs_dir)
+
+    if not cfg_path.exists():
+        raise FileNotFoundError(f"Config not found: {cfg_path}")
+
     # Load the yaml configs file
-    with args.config.open("r", encoding="utf-8") as f:
+    with cfg_path.open("r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
 
     # Resolve mode: CLI > YAML > default "table"

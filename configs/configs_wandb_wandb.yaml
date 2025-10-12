@@ -5,14 +5,14 @@ version: 1
 # ---------------------------------------------------------------------------
 files:
     ycb_base:
-        path: "${BASELINE}"
+        path: "~/tbp/tbp.benchmarks/wandb_files/${BASELINE}"
         csv:
             sep: ","
             header: true
             encoding: "utf-8"
 
     ycb_prop:
-        path: "${PROPOSED}"
+        path: "~/tbp/tbp.benchmarks/wandb_files/${PROPOSED}"
         csv:
             sep: ","
             header: true

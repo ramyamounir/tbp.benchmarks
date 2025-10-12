@@ -5,7 +5,7 @@ version: 1
 # ---------------------------------------------------------------------------
 files:
     ycb_base:
-        path: "${BASELINE}"
+        path: "~/tbp/tbp.benchmarks/wandb_files/${BASELINE}"
         csv:
             sep: ","
             header: true

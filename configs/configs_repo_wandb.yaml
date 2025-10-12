@@ -26,7 +26,7 @@ files:
             encoding: "utf-8"
 
     ycb_prop:
-        path: "${PROPOSED}"
+        path: "~/tbp/tbp.benchmarks/wandb_files/${PROPOSED}"
         csv:
             sep: ","
             header: true

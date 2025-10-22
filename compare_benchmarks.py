@@ -368,8 +368,10 @@ def render_markdown_for_experiment(
     show_deltas: bool,
     show_pass_fail: bool,
     symbols: Dict[str, str],
+    baseline_label: str = "Baseline",
+    proposed_label: str = "Proposed",
 ) -> str:
-    headers = ["Metric", "Baseline", "Proposed"]
+    headers = ["Metric", baseline_label, proposed_label]
     if show_deltas:
         headers.append("Δ")
     if show_pass_fail:
@@ -410,6 +412,8 @@ def render_markdown(
     cfg: dict,
     filespecs: Dict[str, FileSpec],
     metric_specs: Dict[str, MetricSpec],
+    baseline_label: str = "Baseline",
+    proposed_label: str = "Proposed",
 ) -> str:
     tbl_cfg = cfg.get("output", {}).get("table", {})
     float_precision = int(tbl_cfg.get("float_precision", 2))
@@ -454,6 +458,8 @@ def render_markdown(
                 show_deltas=show_deltas,
                 show_pass_fail=show_pass_fail,
                 symbols=symbols,
+                baseline_label=baseline_label,
+                proposed_label=proposed_label,
             )
         )
 
@@ -710,6 +716,18 @@ def main():
         help="Proposed selection: a folder (repo) or a .csv file (wandb).",
     )
     ap.add_argument(
+        "--baseline-label",
+        type=str,
+        default="Baseline",
+        help="Header label for the Baseline column in markdown tables.",
+    )
+    ap.add_argument(
+        "--proposed-label",
+        type=str,
+        default="Proposed",
+        help="Header label for the Proposed column in markdown tables.",
+    )
+    ap.add_argument(
         "--config",
         type=Path,
         help="Optional explicit config YAML path. Overrides automatic selection.",
@@ -748,7 +766,13 @@ def main():
     metric_specs = load_metric_specs(cfg)
 
     if mode == "table":
-        md = render_markdown(cfg, filespecs, metric_specs)
+        md = render_markdown(
+            cfg,
+            filespecs,
+            metric_specs,
+            baseline_label=args.baseline_label,
+            proposed_label=args.proposed_label,
+        )
         if args.out:
             args.out.write_text(md, encoding="utf-8")
             print(f"Wrote Markdown to {args.out}")

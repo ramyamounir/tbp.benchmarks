@@ -25,6 +25,13 @@ files:
             header: true
             encoding: "utf-8"
 
+    logos_on_objects_base:
+        path: "~/tbp/${BASELINE}/benchmarks/results/logos_on_objects.csv"
+        csv:
+            sep: ","
+            header: true
+            encoding: "utf-8"
+
     ycb10_prop:
         path: "~/tbp/${PROPOSED}/benchmarks/results/ycb_10objs.csv"
         csv:
@@ -41,6 +48,13 @@ files:
 
     ycb_ui_prop:
         path: "~/tbp/${PROPOSED}/benchmarks/results/ycb_unsupervised_inference.csv"
+        csv:
+            sep: ","
+            header: true
+            encoding: "utf-8"
+
+    logos_on_objects_prop:
+        path: "~/tbp/${PROPOSED}/benchmarks/results/logos_on_objects.csv"
         csv:
             sep: ","
             header: true
@@ -88,6 +102,31 @@ metrics:
                     - kind: round
                       decimals: 2
 
+    percent_correct_compositional:
+        output_name: correct_child_or_parent
+        units: "%"
+        higher_is_better: true
+        tolerance: 0.10
+        columns:
+            baseline:
+                column: "Correct Child or Parent (%)|align right"
+                transforms:
+                    - kind: to_number
+                    - kind: clip
+                      min: 0
+                      max: 100
+                    - kind: round
+                      decimals: 2
+            proposed:
+                column: "Correct Child or Parent (%)|align right"
+                transforms:
+                    - kind: to_number
+                    - kind: clip
+                      min: 0
+                      max: 100
+                    - kind: round
+                      decimals: 2
+
     rotation_error:
         output_name: rotation_error
         units: "deg"
@@ -102,6 +141,25 @@ metrics:
                       decimals: 2
             proposed:
                 column: "Rotation Error (degrees)|align right"
+                transforms:
+                    - kind: to_number
+                    - kind: round
+                      decimals: 2
+
+    prediction_error:
+        output_name: avg_prediction_error
+        units: ""
+        higher_is_better: false
+        tolerance: 0.01
+        columns:
+            baseline:
+                column: "Avg Prediction Error|align right"
+                transforms:
+                    - kind: to_number
+                    - kind: round
+                      decimals: 2
+            proposed:
+                column: "Avg Prediction Error|align right"
                 transforms:
                     - kind: to_number
                     - kind: round
@@ -411,6 +469,66 @@ experiments:
           - match_steps
           - runtime
           - episode_runtime
+
+    - name: "infer_comp_lvl1_with_monolithic_models"
+      files:
+          baseline: logos_on_objects_base
+          proposed: logos_on_objects_prop
+      metrics:
+          - percent_correct_compositional
+          - used_mlh
+          - match_steps
+          - rotation_error
+          - prediction_error
+          - runtime
+
+    - name: "infer_comp_lvl1_with_comp_models"
+      files:
+          baseline: logos_on_objects_base
+          proposed: logos_on_objects_prop
+      metrics:
+          - percent_correct_compositional
+          - used_mlh
+          - match_steps
+          - rotation_error
+          - prediction_error
+          - runtime
+
+    - name: "infer_comp_lvl2_with_comp_models"
+      files:
+          baseline: logos_on_objects_base
+          proposed: logos_on_objects_prop
+      metrics:
+          - percent_correct_compositional
+          - used_mlh
+          - match_steps
+          - rotation_error
+          - prediction_error
+          - runtime
+
+    - name: "infer_comp_lvl3_with_comp_models"
+      files:
+          baseline: logos_on_objects_base
+          proposed: logos_on_objects_prop
+      metrics:
+          - percent_correct_compositional
+          - used_mlh
+          - match_steps
+          - rotation_error
+          - prediction_error
+          - runtime
+
+    - name: "infer_comp_lvl4_with_comp_models"
+      files:
+          baseline: logos_on_objects_base
+          proposed: logos_on_objects_prop
+      metrics:
+          - percent_correct_compositional
+          - used_mlh
+          - match_steps
+          - rotation_error
+          - prediction_error
+          - runtime
 
 # ---------------------------------------------------------------------------
 # Output options

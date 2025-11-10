@@ -25,7 +25,14 @@ files:
             header: true
             encoding: "utf-8"
 
-    ycb_prop:
+    logos_on_objects_base:
+        path: "~/tbp/${BASELINE}/benchmarks/results/logos_on_objects.csv"
+        csv:
+            sep: ","
+            header: true
+            encoding: "utf-8"
+
+    wandb_prop:
         path: "~/tbp/tbp.benchmarks/wandb_files/${PROPOSED}"
         csv:
             sep: ","
@@ -74,6 +81,31 @@ metrics:
                     - kind: round
                       decimals: 2
 
+    percent_correct_compositional:
+        output_name: correct_child_or_parent
+        units: "%"
+        higher_is_better: true
+        tolerance: 0.10
+        columns:
+            baseline:
+                column: "Correct Child or Parent (%)|align right"
+                transforms:
+                    - kind: to_number
+                    - kind: clip
+                      min: 0
+                      max: 100
+                    - kind: round
+                      decimals: 2
+            proposed:
+                column: "overall/percent_correct_child_or_parent"
+                transforms:
+                    - kind: to_number
+                    - kind: clip
+                      min: 0
+                      max: 100
+                    - kind: round
+                      decimals: 2
+
     rotation_error:
         output_name: rotation_error
         units: "deg"
@@ -91,6 +123,25 @@ metrics:
                 transforms:
                     - kind: to_number
                     - kind: rad_to_deg
+                    - kind: round
+                      decimals: 2
+
+    prediction_error:
+        output_name: avg_prediction_error
+        units: ""
+        higher_is_better: false
+        tolerance: 0.01
+        columns:
+            baseline:
+                column: "Avg Prediction Error|align right"
+                transforms:
+                    - kind: to_number
+                    - kind: round
+                      decimals: 2
+            proposed:
+                column: "overall/avg_prediction_error"
+                transforms:
+                    - kind: to_number
                     - kind: round
                       decimals: 2
 
@@ -199,7 +250,7 @@ experiments:
     - name: "base_config_10distinctobj_dist_agent"
       files:
           baseline: ycb10_base
-          proposed: ycb_prop
+          proposed: wandb_prop
       metrics:
           - percent_correct
           - used_mlh
@@ -211,7 +262,7 @@ experiments:
     - name: "base_config_10distinctobj_surf_agent"
       files:
           baseline: ycb10_base
-          proposed: ycb_prop
+          proposed: wandb_prop
       metrics:
           - percent_correct
           - used_mlh
@@ -223,7 +274,7 @@ experiments:
     - name: "randrot_noise_10distinctobj_dist_agent"
       files:
           baseline: ycb10_base
-          proposed: ycb_prop
+          proposed: wandb_prop
       metrics:
           - percent_correct
           - used_mlh
@@ -235,7 +286,7 @@ experiments:
     - name: "randrot_noise_10distinctobj_dist_on_distm"
       files:
           baseline: ycb10_base
-          proposed: ycb_prop
+          proposed: wandb_prop
       metrics:
           - percent_correct
           - used_mlh
@@ -247,7 +298,7 @@ experiments:
     - name: "randrot_noise_10distinctobj_surf_agent"
       files:
           baseline: ycb10_base
-          proposed: ycb_prop
+          proposed: wandb_prop
       metrics:
           - percent_correct
           - used_mlh
@@ -259,7 +310,7 @@ experiments:
     - name: "randrot_10distinctobj_surf_agent"
       files:
           baseline: ycb10_base
-          proposed: ycb_prop
+          proposed: wandb_prop
       metrics:
           - percent_correct
           - used_mlh
@@ -271,7 +322,7 @@ experiments:
     - name: "randrot_noise_10distinctobj_5lms_dist_agent"
       files:
           baseline: ycb10_base
-          proposed: ycb_prop
+          proposed: wandb_prop
       metrics:
           - percent_correct
           - used_mlh
@@ -283,7 +334,7 @@ experiments:
     - name: "base_10simobj_surf_agent"
       files:
           baseline: ycb10_base
-          proposed: ycb_prop
+          proposed: wandb_prop
       metrics:
           - percent_correct
           - used_mlh
@@ -295,7 +346,7 @@ experiments:
     - name: "randrot_noise_10simobj_dist_agent"
       files:
           baseline: ycb10_base
-          proposed: ycb_prop
+          proposed: wandb_prop
       metrics:
           - percent_correct
           - used_mlh
@@ -307,7 +358,7 @@ experiments:
     - name: "randrot_noise_10simobj_surf_agent"
       files:
           baseline: ycb10_base
-          proposed: ycb_prop
+          proposed: wandb_prop
       metrics:
           - percent_correct
           - used_mlh
@@ -319,7 +370,7 @@ experiments:
     - name: "randomrot_rawnoise_10distinctobj_surf_agent"
       files:
           baseline: ycb10_base
-          proposed: ycb_prop
+          proposed: wandb_prop
       metrics:
           - percent_correct
           - used_mlh
@@ -331,7 +382,7 @@ experiments:
     - name: "base_10multi_distinctobj_dist_agent"
       files:
           baseline: ycb10_base
-          proposed: ycb_prop
+          proposed: wandb_prop
       metrics:
           - percent_correct
           - used_mlh
@@ -343,7 +394,7 @@ experiments:
     - name: "base_77obj_dist_agent"
       files:
           baseline: ycb77_base
-          proposed: ycb_prop
+          proposed: wandb_prop
       metrics:
           - percent_correct
           - used_mlh
@@ -355,7 +406,7 @@ experiments:
     - name: "base_77obj_surf_agent"
       files:
           baseline: ycb77_base
-          proposed: ycb_prop
+          proposed: wandb_prop
       metrics:
           - percent_correct
           - used_mlh
@@ -367,7 +418,7 @@ experiments:
     - name: "randrot_noise_77obj_dist_agent"
       files:
           baseline: ycb77_base
-          proposed: ycb_prop
+          proposed: wandb_prop
       metrics:
           - percent_correct
           - used_mlh
@@ -379,7 +430,7 @@ experiments:
     - name: "randrot_noise_77obj_surf_agent"
       files:
           baseline: ycb77_base
-          proposed: ycb_prop
+          proposed: wandb_prop
       metrics:
           - percent_correct
           - used_mlh
@@ -391,7 +442,7 @@ experiments:
     - name: "randrot_noise_77obj_5lms_dist_agent"
       files:
           baseline: ycb77_base
-          proposed: ycb_prop
+          proposed: wandb_prop
       metrics:
           - percent_correct
           - used_mlh
@@ -403,7 +454,7 @@ experiments:
     - name: "unsupervised_inference_distinctobj_dist_agent"
       files:
           baseline: ycb_ui_base
-          proposed: ycb_prop
+          proposed: wandb_prop
       metrics:
           - percent_correct
           - match_steps
@@ -413,12 +464,72 @@ experiments:
     - name: "unsupervised_inference_distinctobj_surf_agent"
       files:
           baseline: ycb_ui_base
-          proposed: ycb_prop
+          proposed: wandb_prop
       metrics:
           - percent_correct
           - match_steps
           - runtime
           - episode_runtime
+
+    - name: "infer_comp_lvl1_with_monolithic_models"
+      files:
+          baseline: logos_on_objects_base
+          proposed: wandb_prop
+      metrics:
+          - percent_correct_compositional
+          - used_mlh
+          - match_steps
+          - rotation_error
+          - prediction_error
+          - runtime_parallel
+
+    - name: "infer_comp_lvl1_with_comp_models"
+      files:
+          baseline: logos_on_objects_base
+          proposed: wandb_prop
+      metrics:
+          - percent_correct_compositional
+          - used_mlh
+          - match_steps
+          - rotation_error
+          - prediction_error
+          - runtime_parallel
+
+    - name: "infer_comp_lvl2_with_comp_models"
+      files:
+          baseline: logos_on_objects_base
+          proposed: wandb_prop
+      metrics:
+          - percent_correct_compositional
+          - used_mlh
+          - match_steps
+          - rotation_error
+          - prediction_error
+          - runtime_parallel
+
+    - name: "infer_comp_lvl3_with_comp_models"
+      files:
+          baseline: logos_on_objects_base
+          proposed: wandb_prop
+      metrics:
+          - percent_correct_compositional
+          - used_mlh
+          - match_steps
+          - rotation_error
+          - prediction_error
+          - runtime_parallel
+
+    - name: "infer_comp_lvl4_with_comp_models"
+      files:
+          baseline: logos_on_objects_base
+          proposed: wandb_prop
+      metrics:
+          - percent_correct_compositional
+          - used_mlh
+          - match_steps
+          - rotation_error
+          - prediction_error
+          - runtime_parallel
 
 # ---------------------------------------------------------------------------
 # Output options

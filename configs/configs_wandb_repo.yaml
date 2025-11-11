@@ -116,7 +116,6 @@ metrics:
                 column: "overall/avg_rotation_error"
                 transforms:
                     - kind: to_number
-                    - kind: rad_to_deg
                     - kind: round
                       decimals: 2
             proposed:

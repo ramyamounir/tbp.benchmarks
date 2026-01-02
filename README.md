@@ -81,6 +81,19 @@ This will display the command-line interface, including required arguments such 
 
 At a minimum, you must provide a baseline and a proposed input. Each can be either a repository directory (e.g., `~/tbp/tbp.monty`) or a CSV file (`wandb_files/export.csv`).
 
+For a full benchmark WandB exports, make sure you include the following columns:
+```txt
+overall/percent_correct
+overall/percent_correct_child_or_parent
+overall/avg_rotation_error
+overall/avg_num_monty_matching_steps
+overall/parallel_run_time
+overall/percent_used_mlh_after_timeout
+overall/run_time
+overall/avg_episode_run_time
+overall/avg_prediction_error
+```
+
 Examples:
 
 ```zsh

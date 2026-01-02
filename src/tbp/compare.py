@@ -1,20 +1,3 @@
-#!/usr/bin/env python3
-"""
-compare_benchmarks.py
-
-Works with the provided YAML schema:
-- `files` (short names for CSVs)
-- `metrics` (reusable recipes; each defines baseline/proposed columns + ordered transforms)
-- `experiments` (name, files.baseline/proposed, and which metrics to compute)
-- `output` (mode: table | plot, plus table/plot styling)
-
-Usage:
-    python compare_benchmarks.py --config config.yaml [--mode table|plot] [--out out.md]
-
-Notes:
-    - Transforms are applied in the exact order listed for each column.
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -39,6 +22,50 @@ def get_nested(d: dict, path: Iterable[str], default=None):
             return default
         cur = cur[p]
     return cur
+
+
+# ============================== YAML ${...} expansion ==============================
+
+_VAR_PATTERN = re.compile(r"\$\{([A-Za-z_][A-Za-z0-9_]*)\}")
+
+
+def _expand_vars_in_string(s: str, mapping: dict[str, str]) -> str:
+    """
+    Expand ${VARNAME} occurrences using mapping first, then os.environ, else leave unchanged.
+    """
+
+    def repl(m: re.Match[str]) -> str:
+        key = m.group(1)
+        if key in mapping:
+            return mapping[key]
+        if key in os.environ:
+            return os.environ[key]
+        return m.group(0)
+
+    return _VAR_PATTERN.sub(repl, s)
+
+
+def expand_vars_in_cfg(obj: Any, mapping: dict[str, str]) -> Any:
+    """
+    Recursively expand ${VARS} in all strings in a config structure.
+    """
+    if isinstance(obj, str):
+        return _expand_vars_in_string(obj, mapping)
+    if isinstance(obj, list):
+        return [expand_vars_in_cfg(x, mapping) for x in obj]
+    if isinstance(obj, dict):
+        return {k: expand_vars_in_cfg(v, mapping) for k, v in obj.items()}
+    return obj
+
+
+def cli_var_mapping(
+    b_kind: str, p_kind: str, baseline: Path, proposed: Path
+) -> dict[str, str]:
+    """Values injected into YAML ${...} placeholders."""
+    return {
+        "BASELINE_PATH": str(baseline.expanduser().resolve()),
+        "PROPOSED_PATH": str(proposed.expanduser().resolve()),
+    }
 
 
 # ============================== Transforms (ordered) ==============================
@@ -179,7 +206,6 @@ def find_id_column(df: pd.DataFrame, preferred: Optional[str] = None) -> Optiona
     for cand in ID_CANDIDATES:
         if cand in df.columns:
             return cand
-    # final try (case-insensitive)
     lower_map = {c.lower(): c for c in df.columns}
     for cand in [c.lower() for c in ID_CANDIDATES]:
         if cand in lower_map:
@@ -188,7 +214,13 @@ def find_id_column(df: pd.DataFrame, preferred: Optional[str] = None) -> Optiona
 
 
 def read_csv_filespec(fs: FileSpec) -> pd.DataFrame:
-    df = pd.read_csv(fs.path, sep=fs.sep, header=fs.header, encoding=fs.encoding)
+    df = pd.read_csv(
+        fs.path,
+        sep=fs.sep,
+        header=fs.header,
+        encoding=fs.encoding,
+        dtype=str,
+    )
     return df
 
 
@@ -205,24 +237,19 @@ def find_row_by_name(
       - exact match: df[id_col] == exp_name
       - OR (if allow_suffix): df[id_col] matches ^exp_name($|[delimiters].+)
     Comparison is case-sensitive and trims surrounding whitespace on both sides.
-    If multiple rows match, the first is returned (you can tweak to prefer the longest match).
+    If multiple rows match, the first is returned.
     """
     if id_col not in df.columns:
         return None
 
-    # Normalize to strings for safe ops and strip whitespace
     col = df[id_col].astype(str).str.strip()
     name = str(exp_name).strip()
 
-    # Exact match first
     exact = df.loc[col == name]
     if not exact.empty:
         return exact.iloc[0]
 
-    # Optional suffix match
     if allow_suffix:
-        # Build regex like: ^<name>($|[delims].+)
-        # Escape the name to avoid regex surprises
         safe_name = re.escape(name)
         pattern = rf"^{safe_name}(?:$|[{delimiters}].+)"
         matched = df.loc[col.str.match(pattern, na=False)]
@@ -292,7 +319,6 @@ def fmt_num(x: Any, prec: int) -> str:
         return "—"
     try:
         val = round(float(x), prec)
-        # format with max precision, then strip trailing zeros and dot
         s = f"{val:.{prec}f}".rstrip("0").rstrip(".")
         return s
     except Exception:
@@ -324,12 +350,9 @@ def compute_experiment_rows(
             "Could not infer identifier columns. Consider adding 'id_column' to the file entries."
         )
 
-    # Baseline: allow tag suffix after a delimiter (e.g., "_abcd123"). Useful for wandb tags.
     base_row = find_row_by_name(base_df, base_id_col, exp_name, allow_suffix=True)
-    # Proposed: allow tag suffix after a delimiter (e.g., "_abcd123"). Useful for wandb tags.
     prop_row = find_row_by_name(prop_df, prop_id_col, exp_name, allow_suffix=True)
 
-    # If either side missing, return (None, None) for all metrics
     if base_row is None or prop_row is None:
         values = {}
         for m in metrics:
@@ -338,12 +361,10 @@ def compute_experiment_rows(
 
     values: Dict[str, Tuple[Optional[float], Optional[float]]] = {}
     for m in metrics:
-        # baseline
         b_series = pd.Series([base_row.get(m.baseline_col, pd.NA)])
         b_series = apply_transforms(b_series, m.baseline_transforms)
         b_val = b_series.iloc[0]
 
-        # proposed
         p_series = pd.Series([prop_row.get(m.proposed_col, pd.NA)])
         p_series = apply_transforms(p_series, m.proposed_transforms)
         p_val = p_series.iloc[0]
@@ -384,7 +405,6 @@ def render_markdown_for_experiment(
         "| " + " | ".join(["---"] * len(headers)) + " |",
     ]
 
-    # preserve the order the user listed metrics by iterating over metric_specs keys
     for key, ms in metric_specs.items():
         oname = ms.output_name
         b, p = metric_values.get(oname, (None, None))
@@ -431,7 +451,6 @@ def render_markdown(
         prop_key = exp["files"]["proposed"]
         used_metric_keys = exp["metrics"]
 
-        # Subset metric_specs to the order specified by the experiment
         ms_subset = {k: metric_specs[k] for k in used_metric_keys}
 
         base_fs = filespecs[base_key]
@@ -502,7 +521,6 @@ def render_plots(
     outdir = Path(plot_opts["dir"])
     outdir.mkdir(parents=True, exist_ok=True)
 
-    # Build a dataset: for each metric, gather values across experiments
     exps = cfg.get("experiments", [])
     if not exps:
         print("No experiments to plot.")
@@ -516,7 +534,6 @@ def render_plots(
         return loaded[fskey]
 
     for metric_key, ms in metric_specs.items():
-        # Collect (exp_name, baseline_value, proposed_value)
         rows = []
         for exp in exps:
             if metric_key not in exp["metrics"]:
@@ -540,7 +557,6 @@ def render_plots(
         if not rows:
             continue
 
-        # Create grid
         n = len(rows)
         cols = plot_opts["grid_cols"]
         rows_n = math.ceil(n / cols)
@@ -580,7 +596,6 @@ def render_plots(
                 label="proposed",
             )
 
-            # Tight y-limits to minimize whitespace
             finite_vals = [v for v in vals if math.isfinite(v) and not math.isnan(v)]
             if finite_vals:
                 vmin = min(finite_vals)
@@ -601,7 +616,6 @@ def render_plots(
             for spine in ["top", "right"]:
                 ax.spines[spine].set_visible(False)
 
-            # Title + symbol
             sym = result_symbol(
                 b, p, ms.higher_is_better, ms.tolerance, plot_opts["symbols"]
             )
@@ -641,7 +655,6 @@ def render_plots(
                         fontsize=10,
                     )
 
-        # Hide unused
         total_axes = rows_n * cols
         for j in range(n, total_axes):
             r = j // cols
@@ -665,14 +678,131 @@ def render_plots(
         print(f"Saved: {out_path}")
 
 
+# ============================== Modify-in-place helpers ==============================
+
+_NUM_RE = re.compile(r"[-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?")
+
+
+def _infer_decimals_from_baseline_cell(cell: Any) -> Optional[int]:
+    if cell is None or (isinstance(cell, float) and pd.isna(cell)):
+        return None
+    s = str(cell)
+    m = _NUM_RE.search(s)
+    if not m:
+        return None
+    num = m.group(0)
+    if "." in num:
+        return len(num.split(".", 1)[1])
+    return 0
+
+
+def _decimals_from_round_transform(transforms: list[dict]) -> Optional[int]:
+    for t in transforms:
+        if (t.get("kind") or "").strip() == "round":
+            return int(t.get("decimals", 0))
+    return None
+
+
+def format_value_like_baseline(
+    baseline_cell: Any,
+    new_value: float,
+    *,
+    fallback_decimals: int,
+) -> str:
+    """
+    Replace the numeric part of baseline_cell with new_value while preserving
+    surrounding formatting (for example '%' suffix and existing decimals).
+    """
+    if baseline_cell is None or (
+        isinstance(baseline_cell, float) and pd.isna(baseline_cell)
+    ):
+        s = ""
+    else:
+        s = str(baseline_cell)
+
+    dec = _infer_decimals_from_baseline_cell(s)
+    if dec is None:
+        dec = fallback_decimals
+
+    wants_percent = "%" in s
+
+    num_str = f"{float(new_value):.{dec}f}"
+    if wants_percent:
+        num_with_percent = f"{num_str}%"
+    else:
+        num_with_percent = num_str
+
+    m = _NUM_RE.search(s)
+    if not m:
+        return num_with_percent
+
+    prefix = s[: m.start()]
+    suffix = s[m.end() :]
+
+    if "%" in (prefix + suffix) and wants_percent:
+        return f"{prefix}{num_str}{suffix}"
+
+    return f"{prefix}{num_with_percent}{suffix}"
+
+
+def update_baseline_df_in_place(
+    *,
+    exp_name: str,
+    base_df: pd.DataFrame,
+    prop_df: pd.DataFrame,
+    base_id_col: str,
+    prop_id_col: str,
+    metrics: list[MetricSpec],
+) -> list[tuple[str, Any, Any]]:
+    """
+    Write proposed values into baseline columns for a single experiment.
+
+    Returns:
+        A list of (column_name, old_value, new_value) for changes applied.
+    """
+    base_row = find_row_by_name(base_df, base_id_col, exp_name, allow_suffix=True)
+    prop_row = find_row_by_name(prop_df, prop_id_col, exp_name, allow_suffix=True)
+
+    if base_row is None or prop_row is None:
+        return []
+
+    base_idx = base_row.name
+    changes: list[tuple[str, Any, Any]] = []
+
+    for m in metrics:
+        if m.baseline_col not in base_df.columns:
+            continue
+
+        p_series = pd.Series([prop_row.get(m.proposed_col, pd.NA)])
+        p_series = apply_transforms(p_series, m.proposed_transforms)
+        p_val = p_series.iloc[0]
+        if pd.isna(p_val):
+            continue
+
+        old_cell = base_df.at[base_idx, m.baseline_col]
+
+        dec_from_transform = _decimals_from_round_transform(m.baseline_transforms)
+        fallback_decimals = 2 if dec_from_transform is None else dec_from_transform
+
+        new_cell = format_value_like_baseline(
+            old_cell, float(p_val), fallback_decimals=fallback_decimals
+        )
+
+        if str(old_cell) != str(new_cell):
+            base_df.at[base_idx, m.baseline_col] = new_cell
+            changes.append((m.baseline_col, old_cell, new_cell))
+
+    return changes
+
+
 # ============================== CLI ==============================
 
 
 def classify_input(p: Path) -> str:
     """Return 'repo' if directory, 'wandb' if .csv file, else raise."""
-    if p.suffix.lower() != ".csv":
+    if p.is_dir():
         return "repo"
-    else:
+    if p.is_file() and p.suffix.lower() == ".csv":
         return "wandb"
     raise ValueError(
         f"Cannot classify '{p}'. Provide a folder (repo) or a .csv file (wandb)."
@@ -699,9 +829,116 @@ def resolve_config_path(
     return Path(config_name)
 
 
+def _write_csv_with_backup(
+    df: pd.DataFrame,
+    path: Path,
+    *,
+    encoding: str,
+    backup_suffix: Optional[str],
+) -> None:
+    if backup_suffix:
+        backup_path = path.with_suffix(path.suffix + backup_suffix)
+        backup_path.write_text(path.read_text(encoding=encoding), encoding=encoding)
+    df.to_csv(path, index=False, encoding=encoding)
+
+
+def _modify_in_place(
+    cfg: dict,
+    filespecs: Dict[str, FileSpec],
+    metric_specs: Dict[str, MetricSpec],
+    *,
+    dry_run: bool,
+    backup_suffix: Optional[str],
+) -> None:
+    """
+    Update baseline repo CSVs in-place by writing proposed values into baseline columns.
+
+    Assumptions:
+      - Baseline file specs point to repo CSVs (writable).
+      - Proposed file specs can be repo or wandb CSVs.
+    """
+    exps = cfg.get("experiments", [])
+    if not exps:
+        print("No experiments to modify.")
+        return
+
+    df_cache: dict[str, pd.DataFrame] = {}
+
+    def get_df(fskey: str) -> pd.DataFrame:
+        if fskey not in df_cache:
+            df_cache[fskey] = read_csv_filespec(filespecs[fskey])
+        return df_cache[fskey]
+
+    baseline_keys = sorted({e["files"]["baseline"] for e in exps})
+
+    for base_key in baseline_keys:
+        base_fs = filespecs[base_key]
+        base_path = Path(base_fs.path)
+
+        if not base_path.exists():
+            raise FileNotFoundError(f"Baseline CSV not found: {base_fs.path}")
+
+        base_df = get_df(base_key)
+        base_id_col = find_id_column(base_df, base_fs.id_column)
+        if base_id_col is None:
+            raise ValueError(
+                f"Could not infer id column for baseline file: {base_fs.path}. "
+                "Consider adding 'id_column' to the file entry."
+            )
+
+        all_changes_for_file: list[tuple[str, list[tuple[str, Any, Any]]]] = []
+
+        for exp in exps:
+            if exp["files"]["baseline"] != base_key:
+                continue
+
+            prop_key = exp["files"]["proposed"]
+            prop_fs = filespecs[prop_key]
+            prop_path = Path(prop_fs.path)
+
+            if not prop_path.exists():
+                raise FileNotFoundError(f"Proposed CSV not found: {prop_fs.path}")
+
+            prop_df = get_df(prop_key)
+            prop_id_col = find_id_column(prop_df, prop_fs.id_column)
+            if prop_id_col is None:
+                raise ValueError(
+                    f"Could not infer id column for proposed file: {prop_fs.path}. "
+                    "Consider adding 'id_column' to the file entry."
+                )
+
+            ms_subset = [metric_specs[k] for k in exp["metrics"]]
+            changes = update_baseline_df_in_place(
+                exp_name=exp["name"],
+                base_df=base_df,
+                prop_df=prop_df,
+                base_id_col=base_id_col,
+                prop_id_col=prop_id_col,
+                metrics=ms_subset,
+            )
+            if changes:
+                all_changes_for_file.append((exp["name"], changes))
+
+        if not all_changes_for_file:
+            continue
+
+        print(f"\n=== Modify: {base_path} ===")
+        for exp_name, changes in all_changes_for_file:
+            for col, old, new in changes:
+                print(f"{exp_name} | {col} | {old} -> {new}")
+
+        if dry_run:
+            continue
+
+        _write_csv_with_backup(
+            base_df, base_path, encoding=base_fs.encoding, backup_suffix=backup_suffix
+        )
+        print(f"Wrote updated baseline CSV: {base_path}")
+
+
 def main():
     ap = argparse.ArgumentParser(
-        description="Compare benchmark runs using ordered-transform YAML."
+        description="Compare benchmark runs using YAML configs."
     )
     ap.add_argument(
         "--baseline",
@@ -744,26 +981,61 @@ def main():
     ap.add_argument(
         "--out", type=Path, help="If mode=table, optional Markdown output path."
     )
+
+    ap.add_argument(
+        "--modify-in-place",
+        action="store_true",
+        help="Write proposed values into baseline repo CSVs in-place.",
+    )
+    ap.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="With --modify-in-place, show changes but do not write files.",
+    )
+    ap.add_argument(
+        "--backup-suffix",
+        type=str,
+        default="",
+        help="With --modify-in-place, create a backup next to each modified CSV. ",
+    )
+
     args = ap.parse_args()
 
     b_kind = classify_input(args.baseline)
     p_kind = classify_input(args.proposed)
+
     config_name = choose_config_name(b_kind, p_kind)
     cfg_path = resolve_config_path(args.config, config_name, args.configs_dir)
 
     if not cfg_path.exists():
         raise FileNotFoundError(f"Config not found: {cfg_path}")
 
-    # Load the yaml configs file
     with cfg_path.open("r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f)
 
-    # Resolve mode: CLI > YAML > default "table"
-    mode = args.mode or get_nested(cfg, ["output", "mode"], "table")
+    mapping = cli_var_mapping(b_kind, p_kind, args.baseline, args.proposed)
+    cfg = expand_vars_in_cfg(cfg, mapping)
 
-    # Load file specs and metric specs
     filespecs = to_filespecs(cfg)
     metric_specs = load_metric_specs(cfg)
+
+    if args.modify_in_place:
+        if b_kind != "repo":
+            raise ValueError(
+                "--modify-in-place requires --baseline to be a repo folder."
+            )
+
+        backup_suffix = args.backup_suffix if args.backup_suffix else None
+        _modify_in_place(
+            cfg,
+            filespecs,
+            metric_specs,
+            dry_run=args.dry_run,
+            backup_suffix=backup_suffix,
+        )
+        return
+
+    mode = args.mode or get_nested(cfg, ["output", "mode"], "table")
 
     if mode == "table":
         md = render_markdown(

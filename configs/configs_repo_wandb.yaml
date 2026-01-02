@@ -5,35 +5,35 @@ version: 1
 # ---------------------------------------------------------------------------
 files:
   ycb10_base:
-    path: "~/tbp/${BASELINE}/benchmarks/ycb_10objs.csv"
+    path: "${BASELINE_PATH}/benchmarks/ycb_10objs.csv"
     csv:
       sep: ","
       header: true
       encoding: "utf-8"
 
   ycb77_base:
-    path: "~/tbp/${BASELINE}/benchmarks/ycb_77objs.csv"
+    path: "${BASELINE_PATH}/benchmarks/ycb_77objs.csv"
     csv:
       sep: ","
       header: true
       encoding: "utf-8"
 
   ycb_ui_base:
-    path: "~/tbp/${BASELINE}/benchmarks/ycb_unsupervised_inference.csv"
+    path: "${BASELINE_PATH}/benchmarks/ycb_unsupervised_inference.csv"
     csv:
       sep: ","
       header: true
       encoding: "utf-8"
 
   logos_on_objects_base:
-    path: "~/tbp/${BASELINE}/benchmarks/logos_on_objects.csv"
+    path: "${BASELINE_PATH}/benchmarks/logos_on_objects.csv"
     csv:
       sep: ","
       header: true
       encoding: "utf-8"
 
   wandb_prop:
-    path: "~/tbp/tbp.benchmarks/wandb_files/${PROPOSED}"
+    path: "${PROPOSED_PATH}"
     csv:
       sep: ","
       header: true

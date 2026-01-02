@@ -4,61 +4,61 @@ version: 1
 # Reusable file handles (short names -> file paths and optional CSV options)
 # ---------------------------------------------------------------------------
 files:
-    ycb10_base:
-        path: "~/tbp/${BASELINE}/benchmarks/results/ycb_10objs.csv"
-        csv:
-            sep: ","
-            header: true
-            encoding: "utf-8"
+  ycb10_base:
+    path: "~/tbp/${BASELINE}/benchmarks/ycb_10objs.csv"
+    csv:
+      sep: ","
+      header: true
+      encoding: "utf-8"
 
-    ycb77_base:
-        path: "~/tbp/${BASELINE}/benchmarks/results/ycb_77objs.csv"
-        csv:
-            sep: ","
-            header: true
-            encoding: "utf-8"
+  ycb77_base:
+    path: "~/tbp/${BASELINE}/benchmarks/ycb_77objs.csv"
+    csv:
+      sep: ","
+      header: true
+      encoding: "utf-8"
 
-    ycb_ui_base:
-        path: "~/tbp/${BASELINE}/benchmarks/results/ycb_unsupervised_inference.csv"
-        csv:
-            sep: ","
-            header: true
-            encoding: "utf-8"
+  ycb_ui_base:
+    path: "~/tbp/${BASELINE}/benchmarks/ycb_unsupervised_inference.csv"
+    csv:
+      sep: ","
+      header: true
+      encoding: "utf-8"
 
-    logos_on_objects_base:
-        path: "~/tbp/${BASELINE}/benchmarks/results/logos_on_objects.csv"
-        csv:
-            sep: ","
-            header: true
-            encoding: "utf-8"
+  logos_on_objects_base:
+    path: "~/tbp/${BASELINE}/benchmarks/logos_on_objects.csv"
+    csv:
+      sep: ","
+      header: true
+      encoding: "utf-8"
 
-    ycb10_prop:
-        path: "~/tbp/${PROPOSED}/benchmarks/results/ycb_10objs.csv"
-        csv:
-            sep: ","
-            header: true
-            encoding: "utf-8"
+  ycb10_prop:
+    path: "~/tbp/${PROPOSED}/benchmarks/ycb_10objs.csv"
+    csv:
+      sep: ","
+      header: true
+      encoding: "utf-8"
 
-    ycb77_prop:
-        path: "~/tbp/${PROPOSED}/benchmarks/results/ycb_77objs.csv"
-        csv:
-            sep: ","
-            header: true
-            encoding: "utf-8"
+  ycb77_prop:
+    path: "~/tbp/${PROPOSED}/benchmarks/ycb_77objs.csv"
+    csv:
+      sep: ","
+      header: true
+      encoding: "utf-8"
 
-    ycb_ui_prop:
-        path: "~/tbp/${PROPOSED}/benchmarks/results/ycb_unsupervised_inference.csv"
-        csv:
-            sep: ","
-            header: true
-            encoding: "utf-8"
+  ycb_ui_prop:
+    path: "~/tbp/${PROPOSED}/benchmarks/ycb_unsupervised_inference.csv"
+    csv:
+      sep: ","
+      header: true
+      encoding: "utf-8"
 
-    logos_on_objects_prop:
-        path: "~/tbp/${PROPOSED}/benchmarks/results/logos_on_objects.csv"
-        csv:
-            sep: ","
-            header: true
-            encoding: "utf-8"
+  logos_on_objects_prop:
+    path: "~/tbp/${PROPOSED}/benchmarks/logos_on_objects.csv"
+    csv:
+      sep: ","
+      header: true
+      encoding: "utf-8"
 
 # ---------------------------------------------------------------------------
 # Reusable metric definitions
@@ -77,168 +77,168 @@ files:
 #   - round (decimals), scale (factor), clip (min, max)
 # ---------------------------------------------------------------------------
 metrics:
-    percent_correct:
-        output_name: percent_correct
-        units: "%"
-        higher_is_better: true
-        tolerance: 0.10
-        columns:
-            baseline:
-                column: "Correct (%)|align right"
-                transforms:
-                    - kind: to_number
-                    - kind: clip
-                      min: 0
-                      max: 100
-                    - kind: round
-                      decimals: 2
-            proposed:
-                column: "Correct (%)|align right"
-                transforms:
-                    - kind: to_number
-                    - kind: clip
-                      min: 0
-                      max: 100
-                    - kind: round
-                      decimals: 2
+  percent_correct:
+    output_name: percent_correct
+    units: "%"
+    higher_is_better: true
+    tolerance: 0.10
+    columns:
+      baseline:
+        column: "Correct (%)|align right"
+        transforms:
+          - kind: to_number
+          - kind: clip
+            min: 0
+            max: 100
+          - kind: round
+            decimals: 2
+      proposed:
+        column: "Correct (%)|align right"
+        transforms:
+          - kind: to_number
+          - kind: clip
+            min: 0
+            max: 100
+          - kind: round
+            decimals: 2
 
-    percent_correct_compositional:
-        output_name: correct_child_or_parent
-        units: "%"
-        higher_is_better: true
-        tolerance: 0.10
-        columns:
-            baseline:
-                column: "Correct Child or Parent (%)|align right"
-                transforms:
-                    - kind: to_number
-                    - kind: clip
-                      min: 0
-                      max: 100
-                    - kind: round
-                      decimals: 2
-            proposed:
-                column: "Correct Child or Parent (%)|align right"
-                transforms:
-                    - kind: to_number
-                    - kind: clip
-                      min: 0
-                      max: 100
-                    - kind: round
-                      decimals: 2
+  percent_correct_compositional:
+    output_name: correct_child_or_parent
+    units: "%"
+    higher_is_better: true
+    tolerance: 0.10
+    columns:
+      baseline:
+        column: "Correct Child or Parent (%)|align right"
+        transforms:
+          - kind: to_number
+          - kind: clip
+            min: 0
+            max: 100
+          - kind: round
+            decimals: 2
+      proposed:
+        column: "Correct Child or Parent (%)|align right"
+        transforms:
+          - kind: to_number
+          - kind: clip
+            min: 0
+            max: 100
+          - kind: round
+            decimals: 2
 
-    rotation_error:
-        output_name: rotation_error
-        units: "deg"
-        higher_is_better: false
-        tolerance: 0.01
-        columns:
-            baseline:
-                column: "Rotation Error (degrees)|align right"
-                transforms:
-                    - kind: to_number
-                    - kind: round
-                      decimals: 2
-            proposed:
-                column: "Rotation Error (degrees)|align right"
-                transforms:
-                    - kind: to_number
-                    - kind: round
-                      decimals: 2
+  rotation_error:
+    output_name: rotation_error
+    units: "deg"
+    higher_is_better: false
+    tolerance: 0.01
+    columns:
+      baseline:
+        column: "Rotation Error (degrees)|align right"
+        transforms:
+          - kind: to_number
+          - kind: round
+            decimals: 2
+      proposed:
+        column: "Rotation Error (degrees)|align right"
+        transforms:
+          - kind: to_number
+          - kind: round
+            decimals: 2
 
-    prediction_error:
-        output_name: avg_prediction_error
-        units: ""
-        higher_is_better: false
-        tolerance: 0.01
-        columns:
-            baseline:
-                column: "Avg Prediction Error|align right"
-                transforms:
-                    - kind: to_number
-                    - kind: round
-                      decimals: 2
-            proposed:
-                column: "Avg Prediction Error|align right"
-                transforms:
-                    - kind: to_number
-                    - kind: round
-                      decimals: 2
+  prediction_error:
+    output_name: avg_prediction_error
+    units: ""
+    higher_is_better: false
+    tolerance: 0.01
+    columns:
+      baseline:
+        column: "Avg Prediction Error|align right"
+        transforms:
+          - kind: to_number
+          - kind: round
+            decimals: 2
+      proposed:
+        column: "Avg Prediction Error|align right"
+        transforms:
+          - kind: to_number
+          - kind: round
+            decimals: 2
 
-    match_steps:
-        output_name: match_steps
-        higher_is_better: false
-        tolerance: 0.10
-        columns:
-            baseline:
-                column: "Num Match Steps|align right"
-                transforms:
-                    - kind: to_number
-                    - kind: round
-                      decimals: 0
-            proposed:
-                column: "Num Match Steps|align right"
-                transforms:
-                    - kind: to_number
-                    - kind: round
-                      decimals: 0
+  match_steps:
+    output_name: match_steps
+    higher_is_better: false
+    tolerance: 0.10
+    columns:
+      baseline:
+        column: "Num Match Steps|align right"
+        transforms:
+          - kind: to_number
+          - kind: round
+            decimals: 0
+      proposed:
+        column: "Num Match Steps|align right"
+        transforms:
+          - kind: to_number
+          - kind: round
+            decimals: 0
 
-    runtime:
-        output_name: runtime
-        units: "min"
-        higher_is_better: false
-        tolerance: 0.05
-        columns:
-            baseline:
-                column: "Run Time (mins)|align right"
-                transforms:
-                    - kind: to_number
-                    - kind: round
-                      decimals: 0
-            proposed:
-                column: "Run Time (mins)|align right"
-                transforms:
-                    - kind: to_number
-                    - kind: round
-                      decimals: 0
+  runtime:
+    output_name: runtime
+    units: "min"
+    higher_is_better: false
+    tolerance: 0.05
+    columns:
+      baseline:
+        column: "Run Time (mins)|align right"
+        transforms:
+          - kind: to_number
+          - kind: round
+            decimals: 0
+      proposed:
+        column: "Run Time (mins)|align right"
+        transforms:
+          - kind: to_number
+          - kind: round
+            decimals: 0
 
-    episode_runtime:
-        output_name: episode_runtime
-        units: "sec"
-        higher_is_better: false
-        tolerance: 0.05
-        columns:
-            baseline:
-                column: "Episode Run Time (s)|align right"
-                transforms:
-                    - kind: to_number
-                    - kind: round
-                      decimals: 0
-            proposed:
-                column: "Episode Run Time (s)|align right"
-                transforms:
-                    - kind: to_number
-                    - kind: round
-                      decimals: 0
+  episode_runtime:
+    output_name: episode_runtime
+    units: "sec"
+    higher_is_better: false
+    tolerance: 0.05
+    columns:
+      baseline:
+        column: "Episode Run Time (s)|align right"
+        transforms:
+          - kind: to_number
+          - kind: round
+            decimals: 0
+      proposed:
+        column: "Episode Run Time (s)|align right"
+        transforms:
+          - kind: to_number
+          - kind: round
+            decimals: 0
 
-    used_mlh:
-        output_name: used_mlh
-        units: "%"
-        higher_is_better: false
-        tolerance: 0.10
-        columns:
-            baseline:
-                column: "Used MLH (%)|align right"
-                transforms:
-                    - kind: to_number
-                    - kind: round
-                      decimals: 2
-            proposed:
-                column: "Used MLH (%)|align right"
-                transforms:
-                    - kind: to_number
-                    - kind: round
-                      decimals: 2
+  used_mlh:
+    output_name: used_mlh
+    units: "%"
+    higher_is_better: false
+    tolerance: 0.10
+    columns:
+      baseline:
+        column: "Used MLH (%)|align right"
+        transforms:
+          - kind: to_number
+          - kind: round
+            decimals: 2
+      proposed:
+        column: "Used MLH (%)|align right"
+        transforms:
+          - kind: to_number
+          - kind: round
+            decimals: 2
 
 # ---------------------------------------------------------------------------
 # Experiments
@@ -246,316 +246,316 @@ metrics:
 # Suffix tags are allowed for wandb proposed files.
 # ---------------------------------------------------------------------------
 experiments:
-    - name: "base_config_10distinctobj_dist_agent"
-      files:
-          baseline: ycb10_base
-          proposed: ycb10_prop
-      metrics:
-          - percent_correct
-          - used_mlh
-          - match_steps
-          - rotation_error
-          - runtime
-          - episode_runtime
+  - name: "base_config_10distinctobj_dist_agent"
+    files:
+      baseline: ycb10_base
+      proposed: ycb10_prop
+    metrics:
+      - percent_correct
+      - used_mlh
+      - match_steps
+      - rotation_error
+      - runtime
+      - episode_runtime
 
-    - name: "base_config_10distinctobj_surf_agent"
-      files:
-          baseline: ycb10_base
-          proposed: ycb10_prop
-      metrics:
-          - percent_correct
-          - used_mlh
-          - match_steps
-          - rotation_error
-          - runtime
-          - episode_runtime
+  - name: "base_config_10distinctobj_surf_agent"
+    files:
+      baseline: ycb10_base
+      proposed: ycb10_prop
+    metrics:
+      - percent_correct
+      - used_mlh
+      - match_steps
+      - rotation_error
+      - runtime
+      - episode_runtime
 
-    - name: "randrot_noise_10distinctobj_dist_agent"
-      files:
-          baseline: ycb10_base
-          proposed: ycb10_prop
-      metrics:
-          - percent_correct
-          - used_mlh
-          - match_steps
-          - rotation_error
-          - runtime
-          - episode_runtime
+  - name: "randrot_noise_10distinctobj_dist_agent"
+    files:
+      baseline: ycb10_base
+      proposed: ycb10_prop
+    metrics:
+      - percent_correct
+      - used_mlh
+      - match_steps
+      - rotation_error
+      - runtime
+      - episode_runtime
 
-    - name: "randrot_noise_10distinctobj_dist_on_distm"
-      files:
-          baseline: ycb10_base
-          proposed: ycb10_prop
-      metrics:
-          - percent_correct
-          - used_mlh
-          - match_steps
-          - rotation_error
-          - runtime
-          - episode_runtime
+  - name: "randrot_noise_10distinctobj_dist_on_distm"
+    files:
+      baseline: ycb10_base
+      proposed: ycb10_prop
+    metrics:
+      - percent_correct
+      - used_mlh
+      - match_steps
+      - rotation_error
+      - runtime
+      - episode_runtime
 
-    - name: "randrot_noise_10distinctobj_surf_agent"
-      files:
-          baseline: ycb10_base
-          proposed: ycb10_prop
-      metrics:
-          - percent_correct
-          - used_mlh
-          - match_steps
-          - rotation_error
-          - runtime
-          - episode_runtime
+  - name: "randrot_noise_10distinctobj_surf_agent"
+    files:
+      baseline: ycb10_base
+      proposed: ycb10_prop
+    metrics:
+      - percent_correct
+      - used_mlh
+      - match_steps
+      - rotation_error
+      - runtime
+      - episode_runtime
 
-    - name: "randrot_10distinctobj_surf_agent"
-      files:
-          baseline: ycb10_base
-          proposed: ycb10_prop
-      metrics:
-          - percent_correct
-          - used_mlh
-          - match_steps
-          - rotation_error
-          - runtime
-          - episode_runtime
+  - name: "randrot_10distinctobj_surf_agent"
+    files:
+      baseline: ycb10_base
+      proposed: ycb10_prop
+    metrics:
+      - percent_correct
+      - used_mlh
+      - match_steps
+      - rotation_error
+      - runtime
+      - episode_runtime
 
-    - name: "randrot_noise_10distinctobj_5lms_dist_agent"
-      files:
-          baseline: ycb10_base
-          proposed: ycb10_prop
-      metrics:
-          - percent_correct
-          - used_mlh
-          - match_steps
-          - rotation_error
-          - runtime
-          - episode_runtime
+  - name: "randrot_noise_10distinctobj_5lms_dist_agent"
+    files:
+      baseline: ycb10_base
+      proposed: ycb10_prop
+    metrics:
+      - percent_correct
+      - used_mlh
+      - match_steps
+      - rotation_error
+      - runtime
+      - episode_runtime
 
-    - name: "base_10simobj_surf_agent"
-      files:
-          baseline: ycb10_base
-          proposed: ycb10_prop
-      metrics:
-          - percent_correct
-          - used_mlh
-          - match_steps
-          - rotation_error
-          - runtime
-          - episode_runtime
+  - name: "base_10simobj_surf_agent"
+    files:
+      baseline: ycb10_base
+      proposed: ycb10_prop
+    metrics:
+      - percent_correct
+      - used_mlh
+      - match_steps
+      - rotation_error
+      - runtime
+      - episode_runtime
 
-    - name: "randrot_noise_10simobj_dist_agent"
-      files:
-          baseline: ycb10_base
-          proposed: ycb10_prop
-      metrics:
-          - percent_correct
-          - used_mlh
-          - match_steps
-          - rotation_error
-          - runtime
-          - episode_runtime
+  - name: "randrot_noise_10simobj_dist_agent"
+    files:
+      baseline: ycb10_base
+      proposed: ycb10_prop
+    metrics:
+      - percent_correct
+      - used_mlh
+      - match_steps
+      - rotation_error
+      - runtime
+      - episode_runtime
 
-    - name: "randrot_noise_10simobj_surf_agent"
-      files:
-          baseline: ycb10_base
-          proposed: ycb10_prop
-      metrics:
-          - percent_correct
-          - used_mlh
-          - match_steps
-          - rotation_error
-          - runtime
-          - episode_runtime
+  - name: "randrot_noise_10simobj_surf_agent"
+    files:
+      baseline: ycb10_base
+      proposed: ycb10_prop
+    metrics:
+      - percent_correct
+      - used_mlh
+      - match_steps
+      - rotation_error
+      - runtime
+      - episode_runtime
 
-    - name: "randomrot_rawnoise_10distinctobj_surf_agent"
-      files:
-          baseline: ycb10_base
-          proposed: ycb10_prop
-      metrics:
-          - percent_correct
-          - used_mlh
-          - match_steps
-          - rotation_error
-          - runtime
-          - episode_runtime
+  - name: "randomrot_rawnoise_10distinctobj_surf_agent"
+    files:
+      baseline: ycb10_base
+      proposed: ycb10_prop
+    metrics:
+      - percent_correct
+      - used_mlh
+      - match_steps
+      - rotation_error
+      - runtime
+      - episode_runtime
 
-    - name: "base_10multi_distinctobj_dist_agent"
-      files:
-          baseline: ycb10_base
-          proposed: ycb10_prop
-      metrics:
-          - percent_correct
-          - used_mlh
-          - match_steps
-          - rotation_error
-          - runtime
-          - episode_runtime
+  - name: "base_10multi_distinctobj_dist_agent"
+    files:
+      baseline: ycb10_base
+      proposed: ycb10_prop
+    metrics:
+      - percent_correct
+      - used_mlh
+      - match_steps
+      - rotation_error
+      - runtime
+      - episode_runtime
 
-    - name: "base_77obj_dist_agent"
-      files:
-          baseline: ycb77_base
-          proposed: ycb77_prop
-      metrics:
-          - percent_correct
-          - used_mlh
-          - match_steps
-          - rotation_error
-          - runtime
-          - episode_runtime
+  - name: "base_77obj_dist_agent"
+    files:
+      baseline: ycb77_base
+      proposed: ycb77_prop
+    metrics:
+      - percent_correct
+      - used_mlh
+      - match_steps
+      - rotation_error
+      - runtime
+      - episode_runtime
 
-    - name: "base_77obj_surf_agent"
-      files:
-          baseline: ycb77_base
-          proposed: ycb77_prop
-      metrics:
-          - percent_correct
-          - used_mlh
-          - match_steps
-          - rotation_error
-          - runtime
-          - episode_runtime
+  - name: "base_77obj_surf_agent"
+    files:
+      baseline: ycb77_base
+      proposed: ycb77_prop
+    metrics:
+      - percent_correct
+      - used_mlh
+      - match_steps
+      - rotation_error
+      - runtime
+      - episode_runtime
 
-    - name: "randrot_noise_77obj_dist_agent"
-      files:
-          baseline: ycb77_base
-          proposed: ycb77_prop
-      metrics:
-          - percent_correct
-          - used_mlh
-          - match_steps
-          - rotation_error
-          - runtime
-          - episode_runtime
+  - name: "randrot_noise_77obj_dist_agent"
+    files:
+      baseline: ycb77_base
+      proposed: ycb77_prop
+    metrics:
+      - percent_correct
+      - used_mlh
+      - match_steps
+      - rotation_error
+      - runtime
+      - episode_runtime
 
-    - name: "randrot_noise_77obj_surf_agent"
-      files:
-          baseline: ycb77_base
-          proposed: ycb77_prop
-      metrics:
-          - percent_correct
-          - used_mlh
-          - match_steps
-          - rotation_error
-          - runtime
-          - episode_runtime
+  - name: "randrot_noise_77obj_surf_agent"
+    files:
+      baseline: ycb77_base
+      proposed: ycb77_prop
+    metrics:
+      - percent_correct
+      - used_mlh
+      - match_steps
+      - rotation_error
+      - runtime
+      - episode_runtime
 
-    - name: "randrot_noise_77obj_5lms_dist_agent"
-      files:
-          baseline: ycb77_base
-          proposed: ycb77_prop
-      metrics:
-          - percent_correct
-          - used_mlh
-          - match_steps
-          - rotation_error
-          - runtime
-          - episode_runtime
+  - name: "randrot_noise_77obj_5lms_dist_agent"
+    files:
+      baseline: ycb77_base
+      proposed: ycb77_prop
+    metrics:
+      - percent_correct
+      - used_mlh
+      - match_steps
+      - rotation_error
+      - runtime
+      - episode_runtime
 
-    - name: "unsupervised_inference_distinctobj_dist_agent"
-      files:
-          baseline: ycb_ui_base
-          proposed: ycb_ui_prop
-      metrics:
-          - percent_correct
-          - match_steps
-          - runtime
-          - episode_runtime
+  - name: "unsupervised_inference_distinctobj_dist_agent"
+    files:
+      baseline: ycb_ui_base
+      proposed: ycb_ui_prop
+    metrics:
+      - percent_correct
+      - match_steps
+      - runtime
+      - episode_runtime
 
-    - name: "unsupervised_inference_distinctobj_surf_agent"
-      files:
-          baseline: ycb_ui_base
-          proposed: ycb_ui_prop
-      metrics:
-          - percent_correct
-          - match_steps
-          - runtime
-          - episode_runtime
+  - name: "unsupervised_inference_distinctobj_surf_agent"
+    files:
+      baseline: ycb_ui_base
+      proposed: ycb_ui_prop
+    metrics:
+      - percent_correct
+      - match_steps
+      - runtime
+      - episode_runtime
 
-    - name: "infer_comp_lvl1_with_monolithic_models"
-      files:
-          baseline: logos_on_objects_base
-          proposed: logos_on_objects_prop
-      metrics:
-          - percent_correct_compositional
-          - used_mlh
-          - match_steps
-          - rotation_error
-          - prediction_error
-          - runtime
+  - name: "infer_comp_lvl1_with_monolithic_models"
+    files:
+      baseline: logos_on_objects_base
+      proposed: logos_on_objects_prop
+    metrics:
+      - percent_correct_compositional
+      - used_mlh
+      - match_steps
+      - rotation_error
+      - prediction_error
+      - runtime
 
-    - name: "infer_comp_lvl1_with_comp_models"
-      files:
-          baseline: logos_on_objects_base
-          proposed: logos_on_objects_prop
-      metrics:
-          - percent_correct_compositional
-          - used_mlh
-          - match_steps
-          - rotation_error
-          - prediction_error
-          - runtime
+  - name: "infer_comp_lvl1_with_comp_models"
+    files:
+      baseline: logos_on_objects_base
+      proposed: logos_on_objects_prop
+    metrics:
+      - percent_correct_compositional
+      - used_mlh
+      - match_steps
+      - rotation_error
+      - prediction_error
+      - runtime
 
-    - name: "infer_comp_lvl2_with_comp_models"
-      files:
-          baseline: logos_on_objects_base
-          proposed: logos_on_objects_prop
-      metrics:
-          - percent_correct_compositional
-          - used_mlh
-          - match_steps
-          - rotation_error
-          - prediction_error
-          - runtime
+  - name: "infer_comp_lvl2_with_comp_models"
+    files:
+      baseline: logos_on_objects_base
+      proposed: logos_on_objects_prop
+    metrics:
+      - percent_correct_compositional
+      - used_mlh
+      - match_steps
+      - rotation_error
+      - prediction_error
+      - runtime
 
-    - name: "infer_comp_lvl3_with_comp_models"
-      files:
-          baseline: logos_on_objects_base
-          proposed: logos_on_objects_prop
-      metrics:
-          - percent_correct_compositional
-          - used_mlh
-          - match_steps
-          - rotation_error
-          - prediction_error
-          - runtime
+  - name: "infer_comp_lvl3_with_comp_models"
+    files:
+      baseline: logos_on_objects_base
+      proposed: logos_on_objects_prop
+    metrics:
+      - percent_correct_compositional
+      - used_mlh
+      - match_steps
+      - rotation_error
+      - prediction_error
+      - runtime
 
-    - name: "infer_comp_lvl4_with_comp_models"
-      files:
-          baseline: logos_on_objects_base
-          proposed: logos_on_objects_prop
-      metrics:
-          - percent_correct_compositional
-          - used_mlh
-          - match_steps
-          - rotation_error
-          - prediction_error
-          - runtime
+  - name: "infer_comp_lvl4_with_comp_models"
+    files:
+      baseline: logos_on_objects_base
+      proposed: logos_on_objects_prop
+    metrics:
+      - percent_correct_compositional
+      - used_mlh
+      - match_steps
+      - rotation_error
+      - prediction_error
+      - runtime
 
 # ---------------------------------------------------------------------------
 # Output options
 # ---------------------------------------------------------------------------
 output:
-    mode: table # table | plot
-    table:
-        float_precision: 2
-        include_units_in_headers: true
-        show_deltas: true
-        show_pass_fail: true
-        pass_fail_symbols:
-            pass: "⬜"
-            better: "✅"
-            worse: "❌"
-            na: "—"
-    plot:
-        dir: "plots"
-        dpi: 160
-        figsize: [12, 8]
-        grid_cols: 4
-        bar_width: 0.8
-        annotate_delta: true
-        annotate_symbol: true
-        yaxis_include_zero: false
-        y_padding_ratio: 0.08
-        title_prefix_with_symbol: true
-        colors:
-            baseline: "#9aa0a6"
-            proposed: "#1a73e8"
+  mode: table # table | plot
+  table:
+    float_precision: 2
+    include_units_in_headers: true
+    show_deltas: true
+    show_pass_fail: true
+    pass_fail_symbols:
+      pass: "⬜"
+      better: "✅"
+      worse: "❌"
+      na: "—"
+  plot:
+    dir: "plots"
+    dpi: 160
+    figsize: [12, 8]
+    grid_cols: 4
+    bar_width: 0.8
+    annotate_delta: true
+    annotate_symbol: true
+    yaxis_include_zero: false
+    y_padding_ratio: 0.08
+    title_prefix_with_symbol: true
+    colors:
+      baseline: "#9aa0a6"
+      proposed: "#1a73e8"
